@@ -1,0 +1,44 @@
+body {
+    background-color: #ebebeb;
+}
+.heading {
+    background-color: #eb0707;
+  margin-bottom: 20px;
+  padding: 5px 0px 5px 15px;
+}
+.title {
+    background-color: #21d6be;
+  padding: 5px;
+  color: white;
+}
+#runtime {
+    background-color: #e9b50b;
+  color: #022242;
+  padding: 0px 0px 5px 5px;
+}
+.content {
+    color: #7b3ede;
+}
+#subtitle {
+    color: white;
+  margin-left: 55px;
+}
+#showing {
+    margin-left: 20px;
+}
+#films li::before {
+    content: "";
+}
+.film {
+    font-size: 16px;
+  text-transform: uppercase;
+}
+.sold-out {
+    color: rgb(161, 23, 69);
+}
+img {
+    max-width: 25vw;
+}
+#film-info {
+    padding-bottom: 15px;
+}
