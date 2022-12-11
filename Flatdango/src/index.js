@@ -18,6 +18,8 @@ const btn = document.getElementById('buy-ticket')
 
 let updatedTickets;
 
+// Creating an element that holds the url
+const url = 'http://localhost:3000/films';
 
 const request = async () => {
     // Applying fetch to use data on the db.json
@@ -40,11 +42,12 @@ const request = async () => {
 
     })
     // Including a button function to make changes depending on the number of tickets
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
         if (updatedTickets > 0) {
          remainingTickets.innerHTML = --updatedTickets
         }
          if (updatedTickets <= 0) return alert('No More Tickets')
+         e.preventDefault();
     })
 
 }
