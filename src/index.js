@@ -5,50 +5,104 @@ document.addEventListener('DOMContentLoaded', () => {
 })
 
 
-// Created elements for manupilating the DOM
-const poster1 = document.getElementById('poster')
-const title = document.getElementById('title')
-const runTime = document.getElementById('runtime')
-const content = document.getElementsByClassName('content')
-const filmInfo = document.getElementById('film-info')
-const showTime = document.getElementById('showtime')
-const remainingTickets = document.getElementById('ticket-num')
-const movies = document.getElementById('films')
-const btn = document.getElementById('buy-ticket')
+// Creating an array that contains all data in db.json
+let allFilmsList = [];
 
-let updatedTickets;
+(async () => {
+  const films = document.getElementById('films');
+  const buyTicket = document.getElementById('buy-ticket');
+// Fetch the data to be used
+  const url = 'http://localhost:3000/films';
 
-// Creating an element that holds the url
-const url = 'http://localhost:3000/films';
+  async function getNewItems() {
+    let json;
+    try {
+      const res = await fetch(url);
+      json = await res.json();
 
-const request = async () => {
-    // Applying fetch to use data on the db.json
-    let req = await fetch('http://localhost:3000/films')
-    let res = await req.json()
-    // Using the data retrived from fetch on the DOM
-    poster1.setAttribute('src', res[0].poster)
-    title.innerHTML = res[0].title
-    runTime.innerHTML = res[0].runtime
-    content.innerHTML = res[0].content
-    filmInfo.innerHTML = res[0].description
-    showTime.innerHTML = res[0].showtime
-    // Function for making changes depending on the number of tickets 
-    updatedTickets = (res[0].capacity - res[0].tickets_sold)
-    remainingTickets.innerHTML = updatedTickets
-    res.forEach((element) => {
-        let li = document.createElement('li')
-        movies.appendChild(li)
-        li.append(element.title)
+      if (res.status >= 400) {
+        throw new Error('request did not succeed: ' + res.status);
+      }
+      allFilmsList = json;
 
-    })
-    // Including a button function to make changes depending on the number of tickets
-    btn.addEventListener('click', (e) => {
-        if (updatedTickets > 0) {
-         remainingTickets.innerHTML = --updatedTickets
-        }
-         if (updatedTickets <= 0) return alert('No More Tickets')
-         e.preventDefault();
-    })
+      await renderMovies();
+      await updateMovie(allFilmsList[0]);
+    } catch (e) {
+      console.error('Bad request');
+    }
+  }
+// The card containing the movie description
+  const template = (title, id) =>
+    `<li class="film item"  id=${id}>${title}</li>`;
 
-}
-request()
+  async function updateMovie(movieObj) {
+    const { poster, title, runtime, description, showtime, tickets_sold } =
+      movieObj;
+
+      // Creating an element that holds the url
+    document.getElementById('poster').src = poster;
+    document.getElementById('title').innerHTML = title;
+    document.getElementById('runtime').innerHTML = runtime;
+    document.getElementById('film-info').innerHTML = description;
+    document.getElementById('showtime').innerHTML = showtime;
+    document.getElementById('ticket-num').innerHTML = tickets_sold;
+  }
+// When tickets are bought
+  async function decrementTicket(count, object) {
+    const newObject = { ...object };
+    newObject.tickets_sold - count;
+
+    let tickets_left = object.tickets_sold - count;
+
+    // Updating the json data using post and patch
+
+    return tickets_left;
+  }
+// Rendering the movie data to the page
+  async function renderMovies() {
+    let movieClicked,
+      notClicked = [];
+    const html = allFilmsList.map(({ title, id }) => template(title, id));
+
+    films.innerHTML = html.join('\n');
+
+    let listItems = document.querySelectorAll('.film');
+    let count = 0;
+// Function for buying a ticket
+    buyTicket.addEventListener('click', async (e) => {
+      e.preventDefault();
+      count++;
+
+      let ticketNumber = document.getElementById('ticket-num');
+
+      const currentMovieTitle = document.getElementById('title');
+      let movie = allFilmsList.filter(
+        (ele) => ele.title === currentMovieTitle.innerText
+      )[0];
+
+      ticketNumber.innerText = await decrementTicket(count, movie);
+
+      if (ticketNumber.innerText === '0') {
+        document.querySelector('button').disabled = true;
+        document.querySelector('button').innerText = 'Sold Out';
+      }
+    });
+
+    listItems.forEach((node) => {
+      node.style.cursor = 'pointer';
+// Code for buy ticket button
+      node.addEventListener('click', (e) => {
+        movieClicked = allFilmsList.filter((ele) => ele.id === node.id);
+        updateMovie(movieClicked[0]);
+        notClicked = allFilmsList.filter((ele) => ele.id !== node.id);
+        document.getElementById(`${movieClicked[0].id}`).style.opacity = 0.5;
+        notClicked.forEach((item) => {
+          document.getElementById(`${item.id}`).style.opacity = 1;
+        });
+      });
+    });
+  }
+
+// Call function
+  await getNewItems();
+})();
