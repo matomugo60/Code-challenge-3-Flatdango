@@ -156,9 +156,6 @@ To use this repository on your machine requires some simple steps
 
         cd code-challenge-3-Flatdango
   
-- Then navigate into this folder
-
-        cd Flatdango
 
 - (Optional) Open it in ``Visual Studio Code``
 
